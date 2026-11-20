@@ -322,7 +322,21 @@ window.AZF_DATA = {
    "unit": "pct",
    "z2025": 67.0,
    "z2026": 89.0,
-   "z2026_note": "(not all have written exams yet) Number of childern enrolled in TSA schools: 384'172",
+   "z2026_note": "(not all have written exams yet) Enrolment: see 1.1.1.1.",
+   "sdg": "SDG 4.1, SDG 4.2; SDG 4.5",
+   "global_manual": "no amendment necessary"
+  },
+  {
+   "key": "1.1.1.1",
+   "so": "1",
+   "er": "1.1",
+   "er_name": "Access to formal and non-formal quality basic education services",
+   "indicator": "# of children enrolled in basic education in TSA schools",
+   "full": "# of learners enrolled in basic education (early years, primary, lower secondary) in TSA schools — the enrolment figure behind indicator 1.1.1",
+   "unit": "count",
+   "z2025": 52188.0,
+   "z2026": 384172.0,
+   "z2026_note": "Contributes to 1.1.1 (% passing to the next grade).",
    "sdg": "SDG 4.1, SDG 4.2; SDG 4.5",
    "global_manual": "no amendment necessary"
   },
@@ -406,7 +420,21 @@ window.AZF_DATA = {
    "unit": "pct",
    "z2025": 88.0,
    "z2026": 94.0,
-   "z2026_note": "(not all exams have been written yet) (total number of youth enrolled in upper secondary: 56'985)",
+   "z2026_note": "(not all exams have been written yet) Enrolment: see 1.2.1.1.",
+   "sdg": "SDG 4.1, SDG 4.4; SDG 4.5 ; SDG 8.6",
+   "global_manual": "to be added to Global Manual under \"standardized indicators\""
+  },
+  {
+   "key": "1.2.1.1",
+   "so": "1",
+   "er": "1.2",
+   "er_name": "Access to employment skills development services",
+   "indicator": "# of youth enrolled in upper secondary school",
+   "full": "# of youth enrolled in upper secondary school at the start of the school year — the enrolment figure behind indicator 1.2.1",
+   "unit": "count",
+   "z2025": null,
+   "z2026": 56985.0,
+   "z2026_note": "Contributes to 1.2.1 (% completing the school year). Zone total only; territories did not report this figure separately.",
    "sdg": "SDG 4.1, SDG 4.4; SDG 4.5 ; SDG 8.6",
    "global_manual": "to be added to Global Manual under \"standardized indicators\""
   },
@@ -3772,6 +3800,66 @@ window.AZF_DATA = {
    "key": "4.2.8",
    "tty": "ZAM",
    "value": 1.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "CON",
+   "value": 4546.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "DRC",
+   "value": 131644.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "GHA",
+   "value": 29729.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "KYE",
+   "value": 31661.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "KYW",
+   "value": 143468.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "LIB",
+   "value": 3110.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "RWA",
+   "value": 136.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "UGA",
+   "value": 17478.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "ZAM",
+   "value": 2370.0,
+   "note": null
+  },
+  {
+   "key": "1.1.1.1",
+   "tty": "ZIM",
+   "value": 20030.0,
    "note": null
   }
  ]

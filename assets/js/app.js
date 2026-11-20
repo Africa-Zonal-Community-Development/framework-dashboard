@@ -24,6 +24,8 @@
     { key: '05', so: 'P', tag: 'Purpose', label: 'Individuals reached through all TSA projects & programmes' },
     { key: '05a', so: 'P', tag: 'Purpose', label: 'Unique individuals reached through projects', note: 'New measure in 2026' },
     { key: '1.1.2', so: '1', tag: 'Outcome 1', label: 'Schools operated by TSA' },
+    { key: '1.1.1.1', so: '1', tag: 'Outcome 1', label: 'Children enrolled in basic education in TSA schools' },
+    { key: '1.2.1.1', so: '1', tag: 'Outcome 1', label: 'Youth enrolled in upper secondary school', note: 'New figure in 2026 (zone total)' },
     { key: '2.1.1', so: '2', tag: 'Outcome 2', label: 'People reached by health prevention measures' },
     { key: '3.2.2', so: '3', tag: 'Outcome 3', label: 'People in savings & lending groups / entrepreneurship programmes' },
     { key: '4.1.5', so: '4', tag: 'Outcome 4', label: "People sensitized on gender issues & women's rights" }

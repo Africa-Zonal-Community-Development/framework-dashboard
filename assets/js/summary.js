@@ -5,7 +5,7 @@
   var SC = window.AZF_STORIES;
   var OC = {
     P: { name: 'Goal & Purpose', c: '#02538A', x: '#E3EEF6', keys: ['05', '05a', '03'] },
-    '1': { name: '1 · Quality education & employment skills', c: '#E0A800', x: '#FFF6D7', keys: ['1.1.2', '1.1.1', '1.3'] },
+    '1': { name: '1 · Quality education & employment skills', c: '#E0A800', x: '#FFF6D7', keys: ['1.1.1.1', '1.1.2', '1.1.1'] },
     '2': { name: '2 · Reduced disease burden', c: '#F46D1D', x: '#FDEBDF', keys: ['2.1.1', '2.2.1b', '2.1.5'] },
     '3': { name: '3 · Economic inclusion', c: '#B8457A', x: '#F6E2EB', keys: ['3.2.2', '3.1.2', '3.3.1'] },
     '4': { name: '4 · Safe environments for all', c: '#2E9A5B', x: '#EAF2E3', keys: ['4.1.5', '4.1.1', '4.2.4'] }
@@ -13,7 +13,7 @@
   var SHORT = {
     '05': 'people reached by all TSA projects & programmes', '05a': 'unique individuals reached through projects',
     '03': 'show positive change in attitudes to gender', '04': 'report they can advocate with duty bearers',
-    '1.1.2': 'schools operated by TSA', '1.1.1': 'of learners passed to the next grade (basic education)', '1.3': 'of youth in work after employment-skills training',
+    '1.1.2': 'schools operated by TSA', '1.1.1.1': 'children enrolled in basic education', '1.2.1.1': 'youth enrolled in upper secondary', '1.1.1': 'of learners passed to the next grade (basic education)', '1.3': 'of youth in work after employment-skills training',
     '2.1.1': 'people reached by health prevention', '2.2.1b': 'household members with safe water', '2.1.5': 'women with quality antenatal care',
     '3.2.2': 'people in savings & lending groups', '3.1.2': 'household members less food insecure', '3.3.1': 'disaster-affected people reached',
     '4.1.5': 'people sensitized on gender & women\u2019s rights', '4.1.1': 'caregivers trained in non-violent parenting & protection', '4.2.4': 'trafficking survivors supported to reintegrate',

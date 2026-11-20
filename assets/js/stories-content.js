@@ -35,7 +35,7 @@
     { id: 3, name: 'Education & learning', icon: 'book', inputs: ['School access', 'Sponsorship', 'Literacy', 'Vocational training'],
       chain: ['Learning and achievement', 'Confidence and aspirations', 'Expanded future opportunities'],
       desc: 'Education support was one of the strongest pathways. Improved literacy, achievement and employable skills led to greater self-belief, professional ambitions and wider life prospects.',
-      ind: ['1.1.1', '1.1.2', '1.1.4', '1.1.5', '1.2.1'], so: '1', stories: ['tamela', 'all'] },
+      ind: ['1.1.1.1', '1.1.1', '1.1.2', '1.2.1.1', '1.2.1', '1.1.4', '1.1.5'], so: '1', stories: ['tamela', 'all'] },
     { id: 4, name: 'Social support & inclusion', icon: 'people', inputs: ['Peer support', 'Mentoring', 'Community groups', 'Sport'],
       chain: ['Belonging and confidence', 'Positive choices and participation', 'Inclusion and leadership'],
       desc: 'Community groups, sports programmes, mentoring and collective action strengthened belonging, confidence, positive decision-making and community leadership.',

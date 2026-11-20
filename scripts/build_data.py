@@ -110,6 +110,31 @@ def main(path):
                      'unit': unit, 'z2025': z25, 'z2026': z26, 'z2026_note': n26,
                      'sdg': str(r[COL_SDG]).strip() if r[COL_SDG] else None,
                      'global_manual': re.sub(r'\s+', ' ', str(r[COL_GM])).strip() if r[COL_GM] else None})
+    # Enrolment figures sit in the notes of 1.1.1 / 1.2.1; publish them as their own indicators (Excel numbering 1.1.1.1, 1.2.1.1)
+    def enrolled(text):
+        m = re.search(r"enrol+ed[^\d]*([\d']{3,})", text or '', re.I)
+        return float(m.group(1).replace("'", '')) if m else None
+    raw = {str(r[COL_NR]).split('/')[0].strip(): r for r in rows[1:] if r[COL_NR] is not None}
+    extra = []
+    for parent, key, label, full, note in [
+        ('1.1.1', '1.1.1.1', '# of children enrolled in basic education in TSA schools',
+         '# of learners enrolled in basic education (early years, primary, lower secondary) in TSA schools — the enrolment figure behind indicator 1.1.1',
+         'Contributes to 1.1.1 (% passing to the next grade).'),
+        ('1.2.1', '1.2.1.1', '# of youth enrolled in upper secondary school',
+         '# of youth enrolled in upper secondary school at the start of the school year — the enrolment figure behind indicator 1.2.1',
+         'Contributes to 1.2.1 (% completing the school year). Zone total only; territories did not report this figure separately.')]:
+        p = next((d for d in inds if d['key'] == parent), None)
+        r = raw.get(parent)
+        if not p or r is None: continue
+        z26 = enrolled(str(r[COL_Z26])); z25 = enrolled(str(r[COL_Z25])) if r[COL_Z25] else None
+        if z26 is None: continue
+        tres = [{'key': key, 'tty': x['tty'], 'value': enrolled(x['note']), 'note': None} for x in res if x['key'] == parent and enrolled(x['note'])]
+        res.extend(tres)
+        extra.append((parent, {**p, 'key': key, 'indicator': label, 'full': full, 'unit': 'count', 'z2025': z25, 'z2026': z26, 'z2026_note': note}))
+        p['z2026_note'] = re.sub(r"\s*\(?(total )?n(umbe)?r.*$", '', p['z2026_note'] or '', flags=re.I).strip() + ' Enrolment: see ' + key + '.'
+    for parent, d in extra:
+        inds.insert(next(i for i, x in enumerate(inds) if x['key'] == parent) + 1, d)
+
     for d in inds:  # sheet puts the ER 3.3 label one row late
         if d['key'] == '3.3.1': d['er'] = '3.3'
         if d['key'].startswith('3.3.'): d['er_name'] = 'Resilience to the effects of climate change'
