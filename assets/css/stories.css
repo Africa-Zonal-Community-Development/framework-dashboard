@@ -62,7 +62,7 @@ section.card { scroll-margin-top: 12px; }
 .inputs li { background: var(--x); color: var(--d); font-weight: 700; font-size: .8rem; padding: 4px 10px; border-radius: 99px; }
 .chain { list-style: none; margin: 0; padding: 0; counter-reset: s; }
 .chain li { position: relative; background: var(--x); border-left: 5px solid var(--c); border-radius: 8px; padding: 10px 12px 10px 40px; font-weight: 700; margin-bottom: 26px; }
-.chain li:last-child { margin-bottom: 0; background: var(--c); color: #fff; }
+.chain li:last-child { margin-bottom: 0; background: var(--d); color: #fff; border-left-color: var(--d); }
 .chain li::before { counter-increment: s; content: counter(s); position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: #fff; color: var(--d); font-size: .78rem; display: grid; place-items: center; }
 .chain li:not(:last-child)::after { content: ""; position: absolute; left: 50%; bottom: -21px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 12px solid var(--c); transform: translateX(-50%); }
 .pd-desc { margin: 14px 0 0; font-size: .92rem; line-height: 1.6; }

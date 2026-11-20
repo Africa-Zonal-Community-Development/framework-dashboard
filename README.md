@@ -35,6 +35,11 @@ Selections are kept in the address bar (for example `#so=2&tty=KYW&ind=2.1.1`), 
 
 The narrative is kept in `assets/js/stories.js` (`PW`, `THEMES`, `WORDS`). The figures come from the same database as the dashboard.
 
+## Share button and 2-page summary
+
+- **Share** (top bar on every page): opens the phone's share sheet, or copies the link on a computer. The link keeps the current view, such as a selected outcome, territory or pathway.
+- **2-page summary** (`summary.html`): page 1 covers the results dashboard (headline figures, highlights by Strategic Outcome, reach and reporting by territory, notes). Page 2 covers the stories of change (hypothesis, the eight pathways each with a measured indicator, evidence themes, outcomes and roles, caveats). It renders from live figures, and **Print / save as PDF** produces exactly two A4 pages. `assets/AZF-2026-summary.pdf` is a ready-made copy, which needs regenerating if the figures change.
+
 ## Admin console (sign in and edit)
 
 `admin.html` (linked as **Admin sign in** in the page footer) lets approved admins edit everything:
