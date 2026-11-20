@@ -37,7 +37,8 @@
   var byKey = {}; IND.forEach(function (d) { byKey[d.key] = d; });
   var ttyBy = {}; TTY.forEach(function (t) { ttyBy[t.tty] = t; });
   var val = {}; RES.forEach(function (r) { val[r.key + '|' + r.tty] = r; });
-  var S = { so: 'all', tty: '', key: '05', only: false };
+  var S = { so: 'all', tty: '', key: '05', only: false, open: null };
+  var MOBILE = window.matchMedia('(max-width: 680px)');
 
   // ---------- helpers ----------
   var nf = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 });
@@ -48,6 +49,7 @@
   function el(tag, attrs, kids) {
     var e = document.createElement(tag);
     if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (attrs[k] === null || attrs[k] === undefined) return;
       if (k === 'text') e.textContent = attrs[k];
       else if (k === 'class') e.className = attrs[k];
       else if (k === 'style') Object.keys(attrs.style).forEach(function (p) { e.style.setProperty(p, attrs.style[p]); });
@@ -122,8 +124,10 @@
         ]));
       }
       var isSel = d.key === S.key;
-      var btn = el('button', { type: 'button', class: 'pick', 'aria-pressed': String(isSel), title: d.full, text: d.indicator });
-      btn.addEventListener('click', function (e) { e.stopPropagation(); selectKey(d.key, true); });
+      var isOpen = MOBILE.matches && S.open === d.key;
+      var btn = el('button', { type: 'button', class: 'pick', 'aria-pressed': String(isSel), title: d.full, text: d.indicator,
+        'aria-expanded': MOBILE.matches ? String(isOpen) : null, 'aria-controls': isOpen ? 'inline-' + d.key : null });
+      btn.addEventListener('click', function (e) { e.stopPropagation(); pick(d.key); });
       var v25, v26;
       if (d.unit === 'text') { v25 = el('span', { class: 'muted', text: '—' }); v26 = el('span', { class: 'muted', text: d.z2026_note ? 'Qualitative' : 'No data' }); }
       else { v25 = document.createTextNode(fmt(d.z2025, d.unit)); v26 = el('span', { class: 'v26', text: fmt(d.z2026, d.unit) }); }
@@ -143,11 +147,45 @@
         el('td', { class: 'n', 'data-label': 'Territories reporting' }, [el('span', { class: 'pill', text: String(nReported(d.key)) })]),
         ttyCell
       ]);
-      tr.addEventListener('click', function () { selectKey(d.key, true); });
+      tr.addEventListener('click', function () { pick(d.key); });
       tb.appendChild(tr);
+      if (isOpen) tb.appendChild(inlineDetail(d, col));
     });
     if (!tb.children.length) tb.appendChild(el('tr', {}, [el('td', { colspan: '7', class: 'muted', text: 'No indicators match these filters.' })]));
   }
+
+  // On phones, tapping an indicator opens its territory results right under it.
+  function pick(k) {
+    if (!MOBILE.matches) { selectKey(k, true); return; }
+    S.open = S.open === k ? null : k; S.key = k; redraw();
+    var row = document.querySelector('#ind-body tr.row.sel');
+    if (row) row.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    announce(S.open ? 'Opened ' + k + ': ' + byKey[k].indicator + '. Territory results shown below it.' : 'Closed ' + k);
+  }
+  function territoryRows(d) {
+    return RES.filter(function (r) { return r.key === d.key && r.value !== null; })
+      .sort(function (a, b) { return b.value - a.value; })
+      .map(function (r) { return { id: r.tty, label: ttyBy[r.tty].territory, v: r.value, text: fmt(r.value, d.unit), note: r.note }; });
+  }
+  function inlineDetail(d, col) {
+    var ol = el('ol', { class: 'bars', 'aria-label': 'Territory figures for ' + d.key + ', highest first' });
+    barList(ol, territoryRows(d), { fill: col.l, stroke: col.c, max: d.unit === 'pct' ? 100 : null,
+      empty: d.unit === 'text' ? 'Qualitative indicator — see the Stories of change page.' : 'No territory submitted a figure for this indicator in 2026.' });
+    var notes = RES.filter(function (r) { return r.key === d.key && r.note; });
+    var box = el('div', { class: 'inline-box', id: 'inline-' + d.key }, [
+      el('p', { class: 'inline-full', text: d.full }),
+      el('p', { class: 'inline-h', text: 'Results by territory, 2026' }),
+      ol,
+      d.z2026_note && d.unit !== 'text' ? el('p', { class: 'inline-note' }, [el('b', { text: 'Note: ' }), d.z2026_note]) : null,
+      notes.length ? el('p', { class: 'inline-note', text: notes.map(function (r) { return ttyBy[r.tty].territory + ': ' + r.note; }).join(' · ') }) : null,
+      el('button', { type: 'button', class: 'inline-close', text: 'Close' })
+    ]);
+    box.querySelector('.inline-close').addEventListener('click', function (e) { e.stopPropagation(); pick(d.key); });
+    var tr = el('tr', { class: 'inline-detail', style: { '--rc': col.c, '--rx': col.x } }, [el('td', { colspan: '7' }, [box])]);
+    tr.addEventListener('click', function (e) { e.stopPropagation(); });
+    return tr;
+  }
+  if (MOBILE.addEventListener) MOBILE.addEventListener('change', function () { S.open = null; drawTable(); });
 
   // ---------- bar list (accessible HTML chart) ----------
   function barList(ol, rows, opt) {
@@ -178,10 +216,7 @@
     $('sel-meta').textContent = meta.join('  ·  ');
     $('sel-z25').textContent = d.unit === 'text' ? '—' : fmt(d.z2025, d.unit);
     $('sel-z26').textContent = d.unit === 'text' ? (d.z2026_note ? 'Qualitative' : '—') : fmt(d.z2026, d.unit);
-    var rows = RES.filter(function (r) { return r.key === d.key && r.value !== null; })
-      .sort(function (a, b) { return b.value - a.value; })
-      .map(function (r) { return { id: r.tty, label: ttyBy[r.tty].territory, v: r.value, text: fmt(r.value, d.unit), note: r.note }; });
-    barList($('bars'), rows, { fill: col.l, stroke: col.c, max: d.unit === 'pct' ? 100 : null,
+    barList($('bars'), territoryRows(d), { fill: col.l, stroke: col.c, max: d.unit === 'pct' ? 100 : null,
       empty: d.unit === 'text' ? 'Qualitative indicator — see the stories section below.' : 'No territory submitted a figure for this indicator in 2026.' });
     var notes = $('bar-notes'); notes.textContent = '';
     if (d.z2026_note && d.unit !== 'text') notes.appendChild(el('li', {}, [el('b', { text: 'Zone: ' }), d.z2026_note]));
