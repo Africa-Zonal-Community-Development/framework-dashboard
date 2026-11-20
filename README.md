@@ -50,6 +50,14 @@ The narrative is kept in `assets/js/stories.js` (`PW`, `THEMES`, `WORDS`). The f
 
 It also shows an activity log of every change and has exports (`azf-data.js`, JSON, CSV).
 
+**Entering results** (Territory results tab) works in two ways:
+- **One indicator, all territories:** fill in a column across the zone, then optionally set the zone total to the sum.
+- **One territory, all indicators:** type in a whole territory report at once, filtered by outcome.
+
+Numbers can be typed as `143468`, `143,468`, `143'468` or `85%`. **Enter** moves down a row, and **Ctrl/Cmd + S** saves. Changed rows are highlighted until saved, invalid values are flagged, and the page warns before you leave with unsaved changes.
+
+**Every result change is logged** automatically in the database (`audit_log`) with who made it, when, and the old and new values. The log appears under the form ("Change history for these results") and in the **Activity log** tab, which you can filter by area or person and download as CSV.
+
 - **Sign-in:** enter an approved email, receive a one-time code by email, and type it in. There are no passwords.
 - **Admins:** `dns.brns15@gmail.com` and `sarahmakanjera@gmail.com`. Admins can add or remove others in the console.
 - **Limits:** each email gets 5 code requests and 5 sign-ins per hour, enforced in the database (`request_signin_code`, `admin_access_token_hook`).

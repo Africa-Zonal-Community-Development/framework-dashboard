@@ -30,7 +30,7 @@
   }
   function msg(id, text, kind) { var m = $(id); m.textContent = text || ''; m.className = 'msg' + (kind ? ' ' + kind : ''); if (text) say(text); }
   function say(t) { var l = $('live'); l.textContent = ''; setTimeout(function () { l.textContent = t; }, 30); }
-  function numOrNull(v) { v = String(v == null ? '' : v).trim(); if (v === '') return null; var n = Number(v.replace(/[’',\s]/g, '')); return isNaN(n) ? NaN : n; }
+  function numOrNull(v) { v = String(v == null ? '' : v).trim(); if (v === '') return null; var n = Number(v.replace(/[’',\s%]/g, '')); return isNaN(n) ? NaN : n; }
   function txtOrNull(v) { v = String(v == null ? '' : v).trim(); return v === '' ? null : v; }
   function when(ts) { try { return new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return ts; } }
   function busy(form, on) { form.querySelectorAll('button').forEach(function (b) { b.disabled = on; }); }
@@ -136,6 +136,7 @@
   // ---------- tabs ----------
   var tabs = Array.prototype.slice.call(document.querySelectorAll('[role=tab]'));
   function openTab(t, focus) {
+    if (!$('p-res').hidden && t.id !== 'tab-res' && RES.dirty) { if (!confirmLeave()) return; drawRes(); }
     tabs.forEach(function (b) {
       var on = b === t;
       b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
@@ -216,67 +217,183 @@
   });
 
   // ---------- territory results ----------
+  // Two ways in: one indicator across all territories, or one territory across all indicators.
+  var RES = { mode: 'ind', dirty: 0 };
+  var UNIT_HINT = { pct: 'Percent: enter 0–100 (85 or 85% both work).', tty: 'Territory count: enter 1 if the territory meets it.', text: 'Qualitative: use the note.', count: 'Count: whole numbers.' };
+  var ttyName = function (c) { var t = DB.territories.find(function (x) { return x.tty === c; }); return t ? t.territory : c; };
+  function fmtVal(v, unit) { if (v == null || v === '') return '—'; var n = Number(v); if (isNaN(n)) return String(v); return unit === 'pct' ? Math.round(n * 10) / 10 + '%' : n.toLocaleString('en-GB'); }
+  function parseVal(v) { v = String(v == null ? '' : v).replace(/%/g, ''); return numOrNull(v); }
+  function resRows() { return Array.prototype.slice.call($('res-body').querySelectorAll('tr[data-key]')); }
+  function countDirty() {
+    var n = resRows().filter(function (tr) { return tr.classList.contains('changed'); }).length;
+    RES.dirty = n;
+    $('res-dirty').textContent = n ? n + ' unsaved change' + (n === 1 ? '' : 's') : 'No unsaved changes';
+    $('res-dirty').className = 'dirty-count' + (n ? ' on' : '');
+    $('res-save').disabled = !n; $('res-discard').disabled = !n;
+  }
+  function confirmLeave() { return !RES.dirty || confirm('You have ' + RES.dirty + ' unsaved change' + (RES.dirty === 1 ? '' : 's') + '. Discard them?'); }
+  window.addEventListener('beforeunload', function (e) { if (RES.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
   function drawResSelect() {
     var s = $('res-ind'), keep = s.value || curKey;
     s.textContent = '';
-    DB.indicators.forEach(function (d) { s.appendChild(el('option', { value: d.key, text: d.key + ' — ' + d.indicator })); });
-    if (keep && indByKey(keep)) s.value = keep;
-  }
-  function drawRes() {
-    var key = $('res-ind').value, d = indByKey(key), tb = $('res-body');
-    tb.textContent = '';
-    if (!d) return;
-    $('res-hint').textContent = d.unit === 'pct' ? 'Percent indicator: enter 0–100 (e.g. 85 for 85%).' : d.unit === 'tty' ? 'Territory-count indicator: enter 1 if the territory meets it.' : d.unit === 'text' ? 'Qualitative indicator: use the note column.' : 'Count indicator: enter whole numbers.';
-    DB.territories.forEach(function (t) {
-      var r = DB.results.find(function (x) { return x.key === key && x.tty === t.tty; }) || {};
-      var v = el('input', { class: 'inp', type: 'text', inputmode: 'decimal', 'aria-label': t.territory + ' value', value: r.value == null ? '' : r.value, 'data-orig': r.value == null ? '' : r.value });
-      var n = el('input', { class: 'inp', type: 'text', 'aria-label': t.territory + ' note', value: r.note || '', 'data-orig': r.note || '' });
-      var tr = el('tr', { 'data-tty': t.tty, 'data-exists': r.key ? '1' : '' }, [
-        el('td', { class: 'tname', text: t.territory + ' (' + t.tty + ')' }),
-        el('td', { 'data-label': 'Value' }, [v]),
-        el('td', { 'data-label': 'Note' }, [n])
-      ]);
-      var mark = function () { tr.className = (v.value !== v.dataset.orig || n.value !== n.dataset.orig) ? 'changed' : ''; };
-      v.addEventListener('input', mark); n.addEventListener('input', mark);
-      tb.appendChild(tr);
+    var lastSo = null, grp = null;
+    DB.indicators.forEach(function (d) {
+      if (d.so !== lastSo) { lastSo = d.so; grp = el('optgroup', { label: SO[d.so] }); s.appendChild(grp); }
+      grp.appendChild(el('option', { value: d.key, text: d.key + ' — ' + d.indicator }));
     });
-    msg('res-msg', '');
+    if (keep && indByKey(keep)) s.value = keep;
+    var t = $('res-tty'), keepT = t.value;
+    t.textContent = '';
+    DB.territories.forEach(function (x) { t.appendChild(el('option', { value: x.tty, text: x.territory + ' (' + x.tty + ')' })); });
+    if (keepT) t.value = keepT;
   }
-  $('res-ind').addEventListener('change', drawRes);
+
+  function makeRow(key, tty, label, unit, extraTitle) {
+    var r = DB.results.find(function (x) { return x.key === key && x.tty === tty; }) || {};
+    var orig = r.value == null ? '' : String(Number(r.value));
+    var v = el('input', { class: 'inp num-inp', type: 'text', inputmode: 'decimal', autocomplete: 'off', 'aria-label': label + ' — 2026 value', value: orig, 'data-orig': orig });
+    var n = el('input', { class: 'inp', type: 'text', autocomplete: 'off', 'aria-label': label + ' — note', value: r.note || '', 'data-orig': r.note || '' });
+    var suffix = unit === 'pct' ? el('span', { class: 'unit', 'aria-hidden': 'true', text: '%' }) : null;
+    var upd = !r.key ? 'not reported' : (!r.updated_by || r.updated_by === 'postgres') ? 'imported from Excel' : when(r.updated_at) + ' · ' + r.updated_by.split('@')[0];
+    var tr = el('tr', { 'data-key': key, 'data-tty': tty, 'data-exists': r.key ? '1' : '', 'data-unit': unit }, [
+      el('th', { scope: 'row', class: 'tname', title: extraTitle || null, text: label }),
+      el('td', { 'data-label': '2026 value' }, [el('span', { class: 'num-wrap' }, [v, suffix])]),
+      el('td', { 'data-label': 'Note' }, [n]),
+      el('td', { 'data-label': 'Last updated', class: 'upd', text: upd })
+    ]);
+    var mark = function () {
+      var bad = v.value.trim() !== '' && Number.isNaN(parseVal(v.value));
+      v.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      var same = (v.value.trim() === '' ? '' : String(parseVal(v.value))) === v.dataset.orig && n.value.trim() === n.dataset.orig;
+      tr.classList.toggle('changed', !same); countDirty();
+    };
+    v.addEventListener('input', mark); n.addEventListener('input', mark);
+    return tr;
+  }
+
+  function drawRes() {
+    var tb = $('res-body'); tb.textContent = '';
+    var ctx = $('res-context'); ctx.textContent = '';
+    $('res-ind-fld').hidden = RES.mode !== 'ind'; $('res-tty-fld').hidden = RES.mode !== 'tty'; $('res-so-fld').hidden = RES.mode !== 'tty';
+    $('res-sum').hidden = RES.mode !== 'ind';
+    if (RES.mode === 'ind') {
+      var key = $('res-ind').value, d = indByKey(key);
+      if (!d) return;
+      $('res-col1').textContent = 'Territory'; $('res-caption').textContent = 'Territory results for ' + key;
+      var n = DB.results.filter(function (r) { return r.key === key && r.value != null; }).length;
+      ctx.append(el('strong', { text: key + ' · ' + d.indicator }), el('br'),
+        el('span', { text: 'Zone 2025: ' + fmtVal(d.z2025, d.unit) + '   ·   Zone 2026: ' + fmtVal(d.z2026, d.unit) + '   ·   ' + n + ' territor' + (n === 1 ? 'y' : 'ies') + ' reported   ·   ' + UNIT_HINT[d.unit] }));
+      DB.territories.forEach(function (t) { tb.appendChild(makeRow(key, t.tty, t.territory, d.unit)); });
+    } else {
+      var tty = $('res-tty').value, so = $('res-so').value;
+      if (!tty) return;
+      $('res-col1').textContent = 'Indicator'; $('res-caption').textContent = 'Results for ' + ttyName(tty);
+      var nr = DB.results.filter(function (r) { return r.tty === tty && r.value != null; }).length;
+      ctx.append(el('strong', { text: ttyName(tty) }), el('br'), el('span', { text: nr + ' indicators reported. Percent indicators are marked %.' }));
+      var lastSo = null;
+      DB.indicators.filter(function (d) { return d.unit !== 'text' && (!so || d.so === so); }).forEach(function (d) {
+        if (d.so !== lastSo) { lastSo = d.so; tb.appendChild(el('tr', { class: 'grp-row' }, [el('td', { colspan: '4', text: SO[d.so] })])); }
+        tb.appendChild(makeRow(d.key, tty, d.key + ' · ' + d.indicator, d.unit, d.full_text));
+      });
+    }
+    countDirty(); msg('res-msg', ''); loadResHistory();
+  }
+
+  // Enter moves to the same column in the next row
+  $('res-body').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    var td = e.target.closest('td'), tr = td.parentElement, ci = Array.prototype.indexOf.call(tr.children, td);
+    var next = tr.nextElementSibling;
+    while (next && !next.dataset.key) next = next.nextElementSibling;
+    if (next) { var inp = next.children[ci].querySelector('input'); if (inp) { inp.focus(); inp.select(); } }
+  });
+  // Ctrl/Cmd + S saves
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && !$('p-res').hidden) { e.preventDefault(); if (RES.dirty) $('res-form').requestSubmit(); }
+  });
+
+  document.querySelectorAll('input[name=res-mode]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      if (!confirmLeave()) { document.querySelector('input[name=res-mode][value=' + RES.mode + ']').checked = true; return; }
+      RES.mode = r.value; drawRes();
+    });
+  });
+  ['res-ind', 'res-tty', 'res-so'].forEach(function (id) {
+    var prev = null;
+    $(id).addEventListener('focus', function () { prev = this.value; });
+    $(id).addEventListener('change', function () { if (!confirmLeave()) { this.value = prev; return; } prev = this.value; drawRes(); });
+  });
+  $('res-discard').addEventListener('click', function () { drawRes(); msg('res-msg', 'Changes discarded.'); });
+
   $('res-form').addEventListener('submit', async function (ev) {
     ev.preventDefault();
-    var key = $('res-ind').value, ups = [], dels = [], bad = null;
-    $('res-body').querySelectorAll('tr').forEach(function (tr) {
+    var ups = [], dels = [], bad = null;
+    resRows().forEach(function (tr) {
+      if (!tr.classList.contains('changed')) return;
       var ins = tr.querySelectorAll('input'), v = ins[0], n = ins[1];
-      if (v.value === v.dataset.orig && n.value === n.dataset.orig) return;
-      var val = numOrNull(v.value);
-      if (Number.isNaN(val)) { bad = bad || v; v.setAttribute('aria-invalid', 'true'); return; }
-      v.removeAttribute('aria-invalid');
+      var val = parseVal(v.value);
+      if (Number.isNaN(val)) { bad = bad || v; return; }
       var note = txtOrNull(n.value);
-      if (val === null && note === null) { if (tr.dataset.exists) dels.push(tr.dataset.tty); }
-      else ups.push({ key: key, tty: tr.dataset.tty, value: val, note: note });
+      if (val === null && note === null) { if (tr.dataset.exists) dels.push({ key: tr.dataset.key, tty: tr.dataset.tty }); }
+      else ups.push({ key: tr.dataset.key, tty: tr.dataset.tty, value: val, note: note });
     });
-    if (bad) { bad.focus(); return msg('res-msg', 'Values must be numbers (leave blank if not reported).', 'err'); }
+    if (bad) { bad.focus(); return msg('res-msg', 'Some values aren’t numbers (highlighted in red). Fix them or leave them empty.', 'err'); }
+    var pctBad = ups.filter(function (u) { var d = indByKey(u.key); return d && d.unit === 'pct' && u.value != null && (u.value < 0 || u.value > 100); });
+    if (pctBad.length && !confirm(pctBad.length + ' percentage value(s) are outside 0–100. Save anyway?')) return;
     if (!ups.length && !dels.length) return msg('res-msg', 'No changes to save.');
     busy(this, true); msg('res-msg', 'Saving…');
     try {
       if (ups.length) { var a = await sb.from('results').upsert(ups, { onConflict: 'key,tty' }); if (a.error) throw a.error; }
-      if (dels.length) { var b = await sb.from('results').delete().eq('key', key).in('tty', dels); if (b.error) throw b.error; }
-      await loadAll(); $('res-ind').value = key; drawRes();
-      msg('res-msg', 'Saved ' + (ups.length + dels.length) + ' change' + (ups.length + dels.length === 1 ? '' : 's') + '.', 'ok');
+      for (var i = 0; i < dels.length; i++) {
+        var b = await sb.from('results').delete().eq('key', dels[i].key).eq('tty', dels[i].tty); if (b.error) throw b.error;
+      }
+      var total = ups.length + dels.length;
+      RES.dirty = 0;
+      await loadAll();
+      msg('res-msg', 'Saved ' + total + ' change' + (total === 1 ? '' : 's') + '. Each one is recorded in the change history below and in the Activity log.', 'ok');
     } catch (e) { msg('res-msg', errText(e), 'err'); }
-    finally { busy(this, false); }
+    finally { busy(this, false); countDirty(); }
   });
+
   $('res-sum').addEventListener('click', async function () {
     var key = $('res-ind').value, d = indByKey(key);
     if (!d) return;
     if (d.unit === 'pct') return msg('res-msg', 'Percent indicators can’t be summed; enter the zone figure on the Indicators tab.', 'err');
+    if (RES.dirty) return msg('res-msg', 'Save your changes first, then set the total.', 'err');
     var sum = DB.results.filter(function (r) { return r.key === key && r.value != null; }).reduce(function (s, r) { return s + Number(r.value); }, 0);
-    if (!confirm('Set the 2026 zone total for ' + key + ' to ' + sum.toLocaleString() + ' (sum of saved territory values)?')) return;
+    if (!confirm('Set the 2026 zone total for ' + key + ' to ' + sum.toLocaleString('en-GB') + ' (sum of saved territory values)? It is ' + fmtVal(d.z2026, d.unit) + ' now.')) return;
     var r = await sb.from('indicators').update({ z2026: sum }).eq('key', key);
     if (r.error) return msg('res-msg', errText(r.error), 'err');
-    await loadAll(); $('res-ind').value = key; drawRes(); msg('res-msg', 'Zone 2026 total set to ' + sum.toLocaleString() + '.', 'ok');
+    await loadAll(); msg('res-msg', 'Zone 2026 total set to ' + sum.toLocaleString('en-GB') + '.', 'ok');
   });
+
+  // History of result changes for what is on screen
+  function describeResult(x) {
+    var o = x.old_row || {}, n = x.new_row || {}, k = n.key || o.key, t = n.tty || o.tty, d = indByKey(k) || {};
+    var parts = [];
+    if (x.action === 'INSERT') parts.push('added ' + fmtVal(n.value, d.unit) + (n.note ? ' (note: ' + n.note + ')' : ''));
+    else if (x.action === 'DELETE') parts.push('removed ' + fmtVal(o.value, d.unit) + (o.note ? ' (note: ' + o.note + ')' : ''));
+    else {
+      if (JSON.stringify(o.value) !== JSON.stringify(n.value)) parts.push(fmtVal(o.value, d.unit) + ' → ' + fmtVal(n.value, d.unit));
+      if ((o.note || '') !== (n.note || '')) parts.push('note: ' + (o.note || '∅') + ' → ' + (n.note || '∅'));
+      if (!parts.length) parts.push('saved (no change)');
+    }
+    return { item: ttyName(t) + ' · ' + k + (d.indicator ? ' ' + d.indicator : ''), change: parts.join('; ') };
+  }
+  async function loadResHistory() {
+    var ul = $('res-hist'); ul.textContent = '';
+    var q = sb.from('audit_log').select('*').eq('table_name', 'results').order('at', { ascending: false }).limit(40);
+    q = RES.mode === 'ind' ? q.like('row_key', $('res-ind').value + '|%') : q.like('row_key', '%|' + $('res-tty').value);
+    var r = await q;
+    if (r.error) { ul.appendChild(el('li', { text: errText(r.error) })); return; }
+    if (!r.data.length) { ul.appendChild(el('li', { class: 'hint-sm', text: 'No changes yet. Figures loaded from the Excel are the starting point.' })); return; }
+    r.data.forEach(function (x) {
+      var dsc = describeResult(x);
+      ul.appendChild(el('li', {}, [el('span', { class: 'h-when', text: when(x.at) + ' · ' + (x.actor === 'postgres' ? 'setup' : (x.actor || '')) }), el('span', { class: 'h-item', text: dsc.item }), el('span', { class: 'h-chg', text: dsc.change })]));
+    });
+  }
 
   // ---------- territories ----------
   function ttyRow(t) {
@@ -349,24 +466,39 @@
   });
 
   // ---------- activity ----------
+  var LOG = [];
+  function describe(x) {
+    if (x.table_name === 'results') { var d = describeResult(x); return { item: d.item, change: d.change }; }
+    var o = x.old_row || {}, n = x.new_row || {};
+    var label = { indicators: 'Indicator ', territories: 'Territory ', admins: 'Admin ' }[x.table_name] + (x.row_key || '');
+    if (x.action === 'INSERT') return { item: label, change: 'added' };
+    if (x.action === 'DELETE') return { item: label, change: 'deleted' };
+    var ch = Object.keys(n).filter(function (k) { return k !== 'updated_at' && k !== 'updated_by' && JSON.stringify(o[k]) !== JSON.stringify(n[k]); })
+      .map(function (k) { return k + ': ' + short(o[k]) + ' → ' + short(n[k]); }).join('; ');
+    return { item: label, change: ch || 'saved (no change)' };
+  }
   async function loadLog() {
     var tb = $('log-body'); tb.textContent = '';
-    var r = await sb.from('audit_log').select('*').order('at', { ascending: false }).limit(200);
-    if (r.error) { tb.appendChild(el('tr', {}, [el('td', { colspan: '5', text: errText(r.error) })])); return; }
-    if (!r.data.length) tb.appendChild(el('tr', {}, [el('td', { colspan: '5', class: 'hint-sm', text: 'No changes yet.' })]));
-    r.data.forEach(function (x) {
-      var change = '';
-      if (x.action === 'UPDATE' && x.old_row && x.new_row) {
-        change = Object.keys(x.new_row).filter(function (k) { return k !== 'updated_at' && k !== 'updated_by' && JSON.stringify(x.old_row[k]) !== JSON.stringify(x.new_row[k]); })
-          .map(function (k) { return k + ': ' + short(x.old_row[k]) + ' → ' + short(x.new_row[k]); }).join('; ');
-      } else if (x.action === 'INSERT') change = 'added';
-      else if (x.action === 'DELETE') change = 'deleted';
+    var q = sb.from('audit_log').select('*').order('at', { ascending: false }).limit(500);
+    if ($('log-filter').value) q = q.eq('table_name', $('log-filter').value);
+    if ($('log-who').value) q = q.eq('actor', $('log-who').value);
+    var r = await q;
+    if (r.error) { tb.appendChild(el('tr', {}, [el('td', { colspan: '4', text: errText(r.error) })])); return; }
+    LOG = r.data;
+    if (!LOG.length) tb.appendChild(el('tr', {}, [el('td', { colspan: '4', class: 'hint-sm', text: 'No changes recorded for this filter yet.' })]));
+    LOG.forEach(function (x) {
+      var d = describe(x);
       tb.appendChild(el('tr', {}, [
         el('td', { 'data-label': 'When', text: when(x.at) }), el('td', { 'data-label': 'Who', text: x.actor || '' }),
-        el('td', { 'data-label': 'What', text: x.table_name + ' · ' + x.action.toLowerCase() }), el('td', { 'data-label': 'Item', text: x.row_key || '' }),
-        el('td', { class: 'chg', 'data-label': 'Change', text: change })
+        el('td', { 'data-label': 'What changed', text: d.item }), el('td', { class: 'chg', 'data-label': 'Old → new', text: d.change })
       ]));
     });
+    $('log-count').textContent = LOG.length ? 'Showing ' + LOG.length + ' change' + (LOG.length === 1 ? '' : 's') + (LOG.length === 500 ? ' (latest 500)' : '') + '.' : '';
+    var who = $('log-who'), keep = who.value;
+    var people = await sb.from('admins').select('email');
+    who.textContent = ''; who.appendChild(el('option', { value: '', text: 'Anyone' }));
+    (people.data || []).forEach(function (a) { who.appendChild(el('option', { value: a.email, text: a.email })); });
+    who.value = keep;
     var s = await sb.from('signin_log').select('*').order('at', { ascending: false }).limit(30);
     var ul = $('signin-list'); ul.textContent = '';
     (s.data || []).forEach(function (x) { ul.appendChild(el('li', {}, [el('span', { text: x.email }), el('span', { class: 'hint-sm', text: (x.kind === 'signin' ? 'signed in' : 'requested a code') + ' · ' + when(x.at) })])); });
@@ -374,6 +506,15 @@
   }
   function short(v) { if (v === null || v === undefined) return '∅'; v = typeof v === 'string' ? v : JSON.stringify(v); return v.length > 60 ? v.slice(0, 57) + '…' : v; }
   $('log-refresh').addEventListener('click', loadLog);
+  $('log-filter').addEventListener('change', loadLog);
+  $('log-who').addEventListener('change', loadLog);
+  $('log-csv').addEventListener('click', function () {
+    var q = function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var lines = [['When (UTC)', 'Who', 'Area', 'Action', 'What changed', 'Old → new'].join(',')];
+    LOG.forEach(function (x) { var d = describe(x); lines.push([x.at, x.actor, x.table_name, x.action, d.item, d.change].map(q).join(',')); });
+    var a = el('a', { href: URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv' })), download: 'azf-activity-log.csv' });
+    document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 500);
+  });
 
   // ---------- export ----------
   function snapshot() {

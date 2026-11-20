@@ -8,8 +8,8 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin console — AZF Framework Dashboard</title>
   <link rel="icon" href="assets/img/tsa-shield.png">
-  <link rel="stylesheet" href="assets/css/style.css?v=20261120e">
-  <link rel="stylesheet" href="assets/css/admin.css?v=20261120e">
+  <link rel="stylesheet" href="assets/css/style.css?v=20261120f">
+  <link rel="stylesheet" href="assets/css/admin.css?v=20261120f">
 </head>
 <body class="admin">
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -111,23 +111,49 @@
       <div class="panel" role="tabpanel" id="p-res" aria-labelledby="tab-res" hidden>
         <div class="card">
           <h2>Territory results</h2>
-          <label class="lbl" for="res-ind">Indicator</label>
-          <select class="inp" id="res-ind"></select>
-          <p class="hint-sm" id="res-hint"></p>
+          <fieldset class="seg" id="res-mode">
+            <legend class="lbl">Enter results</legend>
+            <label><input type="radio" name="res-mode" value="ind" checked> One indicator, all territories</label>
+            <label><input type="radio" name="res-mode" value="tty"> One territory, all indicators <span class="seg-hint">(e.g. a territory's report)</span></label>
+          </fieldset>
+          <div class="res-pick">
+            <div class="fld" id="res-ind-fld">
+              <label class="lbl" for="res-ind">Indicator</label>
+              <select class="inp" id="res-ind"></select>
+            </div>
+            <div class="fld" id="res-tty-fld" hidden>
+              <label class="lbl" for="res-tty">Territory</label>
+              <select class="inp" id="res-tty"></select>
+            </div>
+            <div class="fld" id="res-so-fld" hidden>
+              <label class="lbl" for="res-so">Show</label>
+              <select class="inp" id="res-so">
+                <option value="">All outcomes</option><option value="P">Goal &amp; Purpose</option><option value="1">1 · Education</option><option value="2">2 · Health &amp; WASH</option><option value="3">3 · Economic inclusion</option><option value="4">4 · Safe environments</option>
+              </select>
+            </div>
+          </div>
+          <div class="res-context" id="res-context" aria-live="polite"></div>
+          <p class="hint-sm">Type numbers as you like: <code>143468</code>, <code>143,468</code>, <code>143'468</code> or <code>85%</code> all work. Press <kbd>Enter</kbd> to move to the next row. Leave a box empty if it wasn't reported. Changed rows turn yellow until you save.</p>
           <form id="res-form" novalidate>
-            <div class="table-scroll" role="region" aria-label="Territory results (scrollable)" tabindex="0">
-              <table class="edit-table">
-                <caption class="sr-only">Figures per territory for the selected indicator</caption>
-                <thead><tr><th scope="col">Territory</th><th scope="col">Value</th><th scope="col">Note</th></tr></thead>
+            <div class="table-scroll" role="region" aria-label="Results to edit (scrollable)" tabindex="0">
+              <table class="edit-table res-table">
+                <caption class="sr-only" id="res-caption">Results to edit</caption>
+                <thead><tr><th scope="col" id="res-col1">Territory</th><th scope="col">2026 value</th><th scope="col">Note</th><th scope="col">Last updated</th></tr></thead>
                 <tbody id="res-body"></tbody>
               </table>
             </div>
-            <div class="row-btns sticky-btns">
-              <button class="btn btn-primary" type="submit">Save changes</button>
-              <button class="btn btn-ghost-dark" type="button" id="res-sum">Set zone 2026 total = sum of territories</button>
+            <div class="save-bar" id="res-bar">
+              <span class="dirty-count" id="res-dirty" aria-live="polite">No unsaved changes</span>
+              <button class="btn btn-primary" type="submit" id="res-save" disabled>Save changes</button>
+              <button class="btn btn-ghost-dark" type="button" id="res-discard" disabled>Discard</button>
+              <button class="btn btn-ghost-dark" type="button" id="res-sum">Set zone total = sum of territories</button>
             </div>
             <p class="msg" id="res-msg" role="status"></p>
           </form>
+          <details class="res-history" id="res-history" open>
+            <summary>Change history for these results</summary>
+            <ul class="hist" id="res-hist"></ul>
+          </details>
         </div>
       </div>
 
@@ -171,16 +197,25 @@
       <!-- Activity -->
       <div class="panel" role="tabpanel" id="p-log" aria-labelledby="tab-log" hidden>
         <div class="card">
-          <h2>Activity</h2>
-          <p class="cap">The last 200 changes, newest first.</p>
-          <button type="button" class="btn btn-ghost-dark btn-sm" id="log-refresh">Refresh</button>
+          <h2>Activity log</h2>
+          <p class="cap">Every change to results, indicators, territories and admins is recorded automatically with who made it, when, and the old and new values.</p>
+          <div class="log-tools">
+            <div class="fld"><label class="lbl" for="log-filter">Show</label>
+              <select class="inp" id="log-filter"><option value="">All changes</option><option value="results" selected>Territory results</option><option value="indicators">Indicators</option><option value="territories">Territories</option><option value="admins">Admins</option></select></div>
+            <div class="fld"><label class="lbl" for="log-who">By</label><select class="inp" id="log-who"><option value="">Anyone</option></select></div>
+            <div class="row-btns">
+              <button type="button" class="btn btn-ghost-dark btn-sm" id="log-refresh">Refresh</button>
+              <button type="button" class="btn btn-ghost-dark btn-sm" id="log-csv">Download log (CSV)</button>
+            </div>
+          </div>
           <div class="table-scroll" role="region" aria-label="Activity log (scrollable)" tabindex="0">
             <table class="edit-table log">
               <caption class="sr-only">Change history</caption>
-              <thead><tr><th scope="col">When</th><th scope="col">Who</th><th scope="col">What</th><th scope="col">Item</th><th scope="col">Change</th></tr></thead>
+              <thead><tr><th scope="col">When</th><th scope="col">Who</th><th scope="col">What changed</th><th scope="col">Old → new</th></tr></thead>
               <tbody id="log-body"></tbody>
             </table>
           </div>
+          <p class="hint-sm" id="log-count"></p>
           <h3>Recent sign-ins</h3>
           <ul class="adm-list" id="signin-list"></ul>
         </div>
@@ -203,7 +238,7 @@
   </main>
 
   <script src="assets/vendor/supabase-2.119.2.min.js"></script>
-  <script src="assets/js/config.js?v=20261120e"></script>
-  <script src="assets/js/admin.js?v=20261120e"></script>
+  <script src="assets/js/config.js?v=20261120f"></script>
+  <script src="assets/js/admin.js?v=20261120f"></script>
 </body>
 </html>
