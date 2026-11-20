@@ -266,3 +266,4 @@ h1 { margin: 0 0 6px; color: var(--navy); font-weight: 800; text-transform: uppe
 .foot-in { align-items: center !important; }
 .foot-in p { margin: 0; }
 @media (max-width: 680px) { .foot .foot-in { flex-direction: row; } }
+.foot .foot-in { justify-content: center; text-align: center; }
