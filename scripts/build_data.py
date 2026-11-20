@@ -31,6 +31,10 @@ TERRITORIES = {
 OUTCOMES = {'P': 'Goal & Purpose', '1': 'Quality education & employment skills', '2': 'Reduced disease burden',
             '3': 'Economic inclusion', '4': 'Safe environments for all'}
 # Column layout of the sheet (0-based)
+# Figures supplied by territories outside the Excel export (kept so a rebuild doesn't drop them).
+SUPPLEMENTARY_RESULTS = {
+    '1.2.1.1': {'ZIM': 521, 'LIB': 2870, 'ZAM': 340, 'CON': 510, 'KYE': 11219, 'KYW': 41525},  # youth enrolled in upper secondary, sent 20 Nov 2026
+}
 COL_B, COL_C, COL_SDG, COL_NR, COL_IND, COL_GM, COL_Z25, COL_Z26, COL_T0 = 1, 2, 3, 4, 5, 6, 8, 9, 10
 
 def num(v):
@@ -134,6 +138,12 @@ def main(path):
         p['z2026_note'] = re.sub(r"\s*\(?(total )?n(umbe)?r.*$", '', p['z2026_note'] or '', flags=re.I).strip() + ' Enrolment: see ' + key + '.'
     for parent, d in extra:
         inds.insert(next(i for i, x in enumerate(inds) if x['key'] == parent) + 1, d)
+    for key, vals in SUPPLEMENTARY_RESULTS.items():
+        if not any(d['key'] == key for d in inds): continue
+        res[:] = [r for r in res if not (r['key'] == key and r['tty'] in vals)]
+        res.extend({'key': key, 'tty': t, 'value': float(v), 'note': None} for t, v in vals.items())
+        d = next(d for d in inds if d['key'] == key)
+        if key == '1.2.1.1': d['z2026_note'] = 'Contributes to 1.2.1 (% completing the school year). Territory figures supplied separately by the territories (not in the Excel).'
 
     for d in inds:  # sheet puts the ER 3.3 label one row late
         if d['key'] == '3.3.1': d['er'] = '3.3'

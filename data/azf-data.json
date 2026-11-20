@@ -433,7 +433,7 @@
    "unit": "count",
    "z2025": null,
    "z2026": 56985.0,
-   "z2026_note": "Contributes to 1.2.1 (% completing the school year). Zone total only; territories did not report this figure separately.",
+   "z2026_note": "Contributes to 1.2.1 (% completing the school year). Territory figures supplied separately by the territories (not in the Excel).",
    "sdg": "SDG 4.1, SDG 4.4; SDG 4.5 ; SDG 8.6",
    "global_manual": "to be added to Global Manual under \"standardized indicators\""
   },
@@ -3859,6 +3859,42 @@
    "key": "1.1.1.1",
    "tty": "ZIM",
    "value": 20030.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "ZIM",
+   "value": 521.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "LIB",
+   "value": 2870.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "ZAM",
+   "value": 340.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "CON",
+   "value": 510.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "KYE",
+   "value": 11219.0,
+   "note": null
+  },
+  {
+   "key": "1.2.1.1",
+   "tty": "KYW",
+   "value": 41525.0,
    "note": null
   }
  ]
