@@ -7,7 +7,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var C = window.AZF_CONFIG;
   var sb = window.supabase.createClient(C.supabaseUrl, C.supabaseKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: 'azf-admin-auth' }
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'azf-admin-auth' }
   });
 
   var SO = { P: 'Goal & Purpose', '1': '1 · Education', '2': '2 · Health & WASH', '3': '3 · Economic inclusion', '4': '4 · Safe environments' };
@@ -56,7 +56,9 @@
       if (r.data === 'not_allowed') { msg('email-msg', 'This email is not on the admin list. Ask an existing admin to add you.', 'err'); return; }
       if (r.data === 'rate_limited') { msg('email-msg', 'You have used all 5 sign-in attempts for this hour. Please try again later.', 'err'); return; }
       if (r.data !== 'ok') { msg('email-msg', 'Enter a valid email address.', 'err'); return; }
-      var s = await sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } });
+      // If an email arrives with a link instead of a code, the link should come back to this page.
+      var back = location.protocol.indexOf('http') === 0 ? location.origin + location.pathname : undefined;
+      var s = await sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: back } });
       if (s.error) {
         var code = s.error.code || '';
         if (code === 'over_email_send_rate_limit' || s.error.status === 429) throw new Error('The email service is busy (too many codes sent recently). Please wait a few minutes and try again.');
@@ -405,6 +407,16 @@
   });
 
   // ---------- start ----------
-  sb.auth.getSession().then(function (r) { if (r.data && r.data.session) enter(r.data.session); else showSignin(); });
+  sb.auth.getSession().then(function (r) {
+    // A sign-in link lands here with tokens or an error in the address; tidy the address afterwards.
+    var h = location.hash || '';
+    if (/error_description=/.test(h)) {
+      var m = decodeURIComponent((/error_description=([^&]+)/.exec(h) || [])[1] || '').replace(/\+/g, ' ');
+      try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+      showSignin(); msg('email-msg', (m || 'That sign-in link did not work') + '. Please request a new code.', 'err'); return;
+    }
+    if (/access_token=/.test(h)) { try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ } }
+    if (r.data && r.data.session) enter(r.data.session); else showSignin();
+  });
   sb.auth.onAuthStateChange(function (event) { if (event === 'SIGNED_OUT' && me) { me = null; showSignin('Your session ended. Please sign in again.'); } });
 })();
