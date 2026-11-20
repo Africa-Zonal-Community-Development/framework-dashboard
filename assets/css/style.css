@@ -223,7 +223,7 @@ h1 { margin: 0 0 6px; color: var(--navy); font-weight: 800; text-transform: uppe
 .site-nav a:hover { background: rgba(255,255,255,.08); }
 .site-nav a[aria-current="page"] { border-bottom-color: var(--red); }
 .site-nav a:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
-.site-nav .site-brand { padding-left: 0; margin-right: 8px; letter-spacing: .03em; }
+.site-nav .site-brand { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px 0 0; margin-right: 8px; color: #fff; font-weight: 700; font-size: .88rem; letter-spacing: .03em; cursor: default; user-select: none; }
 .site-nav .nav-admin { margin-left: auto; font-weight: 600; opacity: .9; }
 
 /* Stories teaser on the dashboard */
