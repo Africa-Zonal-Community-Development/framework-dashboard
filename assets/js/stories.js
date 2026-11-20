@@ -29,7 +29,7 @@
     var keys = {}; PW.forEach(function (p) { p.ind.forEach(function (k) { if (IND[k]) keys[k] = 1; }); });
     $('st-linked').textContent = String(Object.keys(keys).length);
     var i01 = IND['01'];
-    if (i01 && (i01.z2026 != null)) $('ind01').textContent = 'reported: ' + fmt(i01.z2026, i01.unit);
+    if (i01 && (i01.z2026 != null) && $('ind01')) $('ind01').textContent = 'reported: ' + fmt(i01.z2026, i01.unit);
     if ($('built')) $('built').textContent = D.live ? 'Indicator values load live from the results database.' : 'Indicator values from the bundled data snapshot.';
     drawDetail(false);
   }

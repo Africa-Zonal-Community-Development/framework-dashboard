@@ -155,3 +155,5 @@ section.card { scroll-margin-top: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .zoom img, .pw-card { transition: none; } }
 @media print { .site-nav, .jump, .lightbox { display: none; } .pw-detail { break-inside: avoid; } }
+.about-grid.about-one { grid-template-columns: 1fr; }
+.about-one p { max-width: 75ch; }
