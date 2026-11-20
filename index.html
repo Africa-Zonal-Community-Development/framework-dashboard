@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#02538A">
+  <meta name="description" content="Interactive dashboard of the 2026 results submitted by territory for The Salvation Army Africa Zonal Community Development Framework.">
+  <title>Africa Zonal Community Development Framework — 2026 Results</title>
+  <link rel="icon" href="assets/img/tsa-shield.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="hero" id="overview">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="brand"><img src="assets/img/tsa-shield.png" alt="" width="28" height="33"> <span>The Salvation Army Africa Zone</span></p>
+        <p class="kicker">Africa Zonal Community Development</p>
+        <h1>Framework results 2026</h1>
+        <p class="kicker kicker-sub">Results submitted by territory</p>
+        <p class="lede" id="lede">Loading results…</p>
+        <p class="hint">Tap a petal of the framework wheel, or use the filters, to explore each Strategic Outcome. Select any indicator to see its results by territory.</p>
+      </div>
+      <nav class="wheel-col" aria-label="Framework wheel: filter by Strategic Outcome">
+        <div class="wheel">
+          <img src="assets/img/azf-wheel.png" alt="Africa Zonal Framework wheel. Goal in the centre: transformed, inclusive and sustained communities across Africa. Four outcomes around it: economic inclusion (top), quality education (right), safe environments (bottom), reduced disease burden (left)." width="720" height="720">
+          <button type="button" class="hot" data-so="3" style="left:50%;top:26%" aria-pressed="false">Outcome 3: Economic inclusion</button>
+          <button type="button" class="hot" data-so="1" style="left:74%;top:50%" aria-pressed="false">Outcome 1: Quality education and employment skills</button>
+          <button type="button" class="hot" data-so="4" style="left:50%;top:74%" aria-pressed="false">Outcome 4: Safe environments for all</button>
+          <button type="button" class="hot" data-so="2" style="left:26%;top:50%" aria-pressed="false">Outcome 2: Reduced disease burden</button>
+          <button type="button" class="hot hot-c" data-so="P" style="left:50%;top:50%" aria-pressed="false">Goal and Purpose</button>
+        </div>
+        <p class="wheel-hint" aria-hidden="true">Tap a petal to filter · centre = Goal &amp; Purpose</p>
+      </nav>
+    </div>
+    <div class="wave" aria-hidden="true"><svg viewBox="0 0 1200 80" preserveAspectRatio="none" focusable="false"><path d="M0,10 C300,40 700,62 1200,18 L1200,80 L0,80 Z" fill="#B1CBDA" opacity=".7"/><path d="M0,30 C350,58 800,70 1200,36 L1200,80 L0,80 Z" fill="#D8E9F7" opacity=".6"/><path d="M0,44 C380,74 820,78 1200,50 L1200,80 L0,80 Z" fill="#02538A"/></svg></div>
+  </header>
+
+  <main id="main" class="wrap" tabindex="-1">
+    <section aria-labelledby="kpi-h">
+      <h2 id="kpi-h" class="sr-only">Headline figures, 2026</h2>
+      <ul class="kpis" id="kpis"></ul>
+    </section>
+
+    <form class="filters" id="filters" aria-label="Filters" onsubmit="return false">
+      <fieldset class="chips">
+        <legend class="sr-only">Strategic Outcome</legend>
+        <button type="button" class="chip" data-so="all" aria-pressed="true">All outcomes</button>
+        <button type="button" class="chip so-P" data-so="P" aria-pressed="false">Goal &amp; Purpose</button>
+        <button type="button" class="chip so-1" data-so="1" aria-pressed="false">1 · Education</button>
+        <button type="button" class="chip so-2" data-so="2" aria-pressed="false">2 · Health &amp; WASH</button>
+        <button type="button" class="chip so-3" data-so="3" aria-pressed="false">3 · Economic inclusion</button>
+        <button type="button" class="chip so-4" data-so="4" aria-pressed="false">4 · Safe environments</button>
+      </fieldset>
+      <div class="filter-row">
+        <label class="field"><span>Territory</span>
+          <select id="tty-select"><option value="">All territories</option></select>
+        </label>
+        <label class="check"><input type="checkbox" id="only-data"> Only indicators with 2026 data</label>
+      </div>
+    </form>
+
+    <p class="sr-only" aria-live="polite" id="announce"></p>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="ind-h" id="indicator-results">
+        <h2 id="ind-h">Indicator results</h2>
+        <p class="cap">Zone totals as submitted, 2025 vs 2026. Change is % for counts and percentage points (pts) for % indicators. Select a territory in the filters to add its own figure.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Indicator table (scrollable)">
+          <table class="ind-table">
+            <caption class="sr-only">Framework indicators with zone totals for 2025 and 2026, change, and number of territories reporting</caption>
+            <thead><tr>
+              <th scope="col">Ref</th>
+              <th scope="col">Indicator</th>
+              <th scope="col" class="n">2025</th>
+              <th scope="col" class="n">2026</th>
+              <th scope="col" class="n">Change</th>
+              <th scope="col" class="n">Territories</th>
+              <th scope="col" class="n" id="th-tty">Selected territory</th>
+            </tr></thead>
+            <tbody id="ind-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="bt-h" id="by-territory">
+        <h2 id="bt-h">Results by territory</h2>
+        <p class="sel-title" id="sel-title">—</p>
+        <p class="sel-meta" id="sel-meta"></p>
+        <dl class="zone">
+          <div><dt>Zone 2025</dt><dd id="sel-z25">—</dd></div>
+          <div><dt>Zone 2026</dt><dd id="sel-z26">—</dd></div>
+        </dl>
+        <ol class="bars" id="bars" aria-label="Territory figures for the selected indicator, highest first"></ol>
+        <ul class="notes" id="bar-notes"></ul>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="map-h" id="reporting-map">
+      <h2 id="map-h">Reporting map — indicators × territories</h2>
+      <p class="cap">Each cell is a territory's 2026 figure; darker means higher within that indicator (percentages on a 0–100 scale). Empty cells were not reported. Select a cell to choose that indicator and territory. Scroll sideways on small screens.</p>
+      <div class="table-scroll heat-scroll" tabindex="0" role="region" aria-label="Reporting map table (scroll sideways)">
+        <table class="heat" id="heat"></table>
+      </div>
+      <ul class="legend" aria-label="Colour key">
+        <li><i class="sw so-P"></i>Goal &amp; Purpose</li><li><i class="sw so-1"></i>Outcome 1</li><li><i class="sw so-2"></i>Outcome 2</li><li><i class="sw so-3"></i>Outcome 3</li><li><i class="sw so-4"></i>Outcome 4</li><li><i class="sw none"></i>Not reported</li>
+      </ul>
+    </section>
+
+    <div class="grid grid-even">
+      <section class="card" aria-labelledby="cov-h" id="coverage">
+        <h2 id="cov-h">Reporting coverage</h2>
+        <p class="cap">Number of framework indicators each territory reported in 2026, for the outcome selected. Select a territory to see its profile.</p>
+        <ol class="bars" id="cov-bars" aria-label="Indicators reported per territory, most first"></ol>
+      </section>
+      <section class="card" aria-labelledby="tp-h" id="territory-profile">
+        <h2 id="tp-h">Territory profile</h2>
+        <p class="tty-name" id="tty-name">All territories</p>
+        <p class="cap" id="tty-countries">Pick a territory in the filters, the coverage chart or the reporting map.</p>
+        <div id="tty-profile"></div>
+      </section>
+    </div>
+
+    <details class="card story" id="stories">
+      <summary>Stories of change — synthesis of the 24 stories submitted (indicator 02)</summary>
+      <div class="story-body" id="story"></div>
+    </details>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <img src="assets/img/tsa-shield.png" alt="" width="20" height="23">
+      <p>Source: <i id="src-name">Overview AZF results submitted for 2026 by Territory</i>, linked to the TSA African Zone Framework data update 2026. Zone totals are the sheet's "2025 reported results" and "2026 reported results" columns; territory figures are the per-territory columns. The sheet's first "2025" column, filled for only three indicators, is not shown. Burundi and Rwanda are reported as separate columns, as in the sheet. Several 2026 figures are provisional where exams were still being written. <span id="built"></span></p>
+    </div>
+  </footer>
+
+  <script src="data/azf-data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
