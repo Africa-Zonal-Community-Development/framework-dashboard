@@ -5,8 +5,8 @@
   var SC = window.AZF_STORIES;
   var OC = {
     P: { name: 'Goal & Purpose', c: '#02538A', x: '#E3EEF6', keys: ['05', '05a', '03'] },
-    '1': { name: '1 · Quality education & employment skills', c: '#E0A800', x: '#FFF6D7', keys: ['1.1.1.1', '1.1.2', '1.1.1'] },
-    '2': { name: '2 · Reduced disease burden', c: '#F46D1D', x: '#FDEBDF', keys: ['2.1.6', '2.1.4', '2.1.1'] },
+    '1': { name: '1 · Quality education & employment skills', c: '#E0A800', x: '#FFF6D7', keys: ['1.1.1', '1.2.1.1', '1.3'] },
+    '2': { name: '2 · Reduced disease burden', c: '#F46D1D', x: '#FDEBDF', keys: ['2.2.1b', '2.1.5', '2.2.3'] },
     '3': { name: '3 · Economic inclusion', c: '#B8457A', x: '#F6E2EB', keys: ['3.2.2', '3.1.2', '3.3.1'] },
     '4': { name: '4 · Safe environments for all', c: '#2E9A5B', x: '#EAF2E3', keys: ['4.1.5', '4.1.1', '4.2.4'] }
   };
@@ -14,7 +14,7 @@
     '05': 'people reached by all TSA projects & programmes', '05a': 'unique individuals reached through projects',
     '03': 'show positive change in attitudes to gender', '04': 'report they can advocate with duty bearers',
     '1.1.2': 'schools operated by TSA', '1.1.1.1': 'children enrolled in basic education', '1.2.1.1': 'youth enrolled in upper secondary', '1.1.1': 'of learners passed to the next grade (basic education)', '1.3': 'of youth in work after employment-skills training',
-    '2.1.1': 'people reached by health prevention', '2.1.6': 'TSA clinics and medical institutions', '2.1.4': 'people treated for NCDs or communicable diseases', '2.2.1b': 'household members with safe water', '2.1.5': 'women with quality antenatal care',
+    '2.1.1': 'people reached by health prevention', '2.1.6': 'TSA clinics and medical institutions', '2.1.4': 'people treated for NCDs or communicable diseases', '2.2.1b': 'household members with safe water', '2.1.5': 'women with quality antenatal care', '2.2.3': 'people reached by hygiene promotion',
     '3.2.2': 'people in savings & lending groups', '3.1.2': 'household members less food insecure', '3.3.1': 'disaster-affected people reached',
     '4.1.5': 'people sensitized on gender & women\u2019s rights', '4.1.1': 'caregivers trained in non-violent parenting & protection', '4.2.4': 'trafficking survivors supported to reintegrate',
     '3.2.1': 'household members able to meet essential needs', '1.2.2': 'of trainees completed vocational courses', '4.1.4': 'people supported after GBV incidents',
@@ -22,8 +22,10 @@
   };
   function lab(d) { return SHORT[d.key] || d.indicator.replace(/^# of |^Number of /, '').replace(/^% of /, '% '); }
   var KPIS = [['05', 'P', 'Individuals reached through all TSA projects & programmes'], ['05a', 'P', 'Unique individuals reached through projects (new in 2026)'],
-    ['1.1.2', '1', 'Schools operated by TSA'], ['2.1.1', '2', 'People reached by health prevention measures'],
-    ['3.2.2', '3', 'People in savings & lending groups / entrepreneurship'], ['4.1.5', '4', "People sensitized on gender issues & women's rights"]];
+    ['1.1.2', '1', 'Schools operated by TSA'], ['1.1.1.1', '1', 'Children enrolled in basic education in TSA schools'],
+    ['2.1.6', '2', 'TSA clinics and medical institutions'], ['2.1.4', '2', 'People treated for NCDs or communicable diseases'],
+    ['2.1.1', '2', 'People reached by health prevention measures'], ['3.2.2', '3', 'People in savings & lending groups / entrepreneurship'],
+    ['4.1.5', '4', "People sensitized on gender issues & women's rights"]];
 
   function el(tag, attrs, kids) {
     var e = document.createElement(tag);
@@ -94,21 +96,11 @@
     }
     var reach = D.results.filter(function (r) { return r.key === '05' && r.value != null; })
       .sort(function (a, b) { return b.value - a.value; }).map(function (r) { return { n: tty[r.tty], v: r.value }; });
-    var top = reach.slice(0, 9), rest = reach.slice(9);
-    if (rest.length) top.push({ n: rest.length + ' other territories', v: rest.reduce(function (s, r) { return s + r.v; }, 0) });
-    bars('s-reach', top, '#02538A');
+    bars('s-reach', reach, '#02538A');
     var cov = D.territories.map(function (t) { return { n: t.territory, v: vals.filter(function (r) { return r.tty === t.tty; }).length }; })
       .sort(function (a, b) { return b.v - a.v; });
     bars('s-cov', cov, '#0095CC');
 
-    var notes = $('s-notes1'); notes.textContent = '';
-    var noData = D.territories.filter(function (t) { return !vals.some(function (r) { return r.tty === t.tty; }); }).map(function (t) { return t.territory; });
-    [
-      'Zone totals are as submitted by territories. Percentages are zone figures, not averages of territory figures.',
-      'Some 2026 education results are provisional because not all exams had been written when data were submitted.',
-      'Large year-on-year changes partly reflect more territories reporting in 2026, not only real change on the ground.',
-      noData.length ? 'No 2026 figures were received from: ' + noData.join(', ') + '.' : null
-    ].forEach(function (t) { if (t) notes.appendChild(el('li', { text: t })); });
   }
 
   function page2(D) {
