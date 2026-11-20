@@ -96,7 +96,7 @@
 @page { size: A4; margin: 0; }
 @media print {
   .summary-page { background: #fff; }
-  .site-nav, .sum-tools, .skip-link { display: none !important; }
+  .site-nav, .sum-tools, .skip-link, .foot { display: none !important; }
   .sheets { padding: 0; gap: 0; display: block; }
   .sheet { box-shadow: none; zoom: 1; break-after: page; page-break-after: always; }
   .sheet:last-child { break-after: auto; page-break-after: auto; }

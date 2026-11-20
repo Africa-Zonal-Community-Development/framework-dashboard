@@ -104,7 +104,7 @@
     });
     var sel = $('tty-select');
     TTY.forEach(function (t) { sel.appendChild(el('option', { value: t.tty, text: t.territory })); });
-    $('built').textContent = D.live ? 'Figures load live from the admin database' + (D.built ? ', last edited ' + D.built : '') + '.' : 'Showing the bundled data snapshot (' + D.source + ', ' + D.built + ').';
+    if ($('built')) $('built').textContent = D.live ? 'Figures load live from the admin database' + (D.built ? ', last edited ' + D.built : '') + '.' : 'Showing the bundled data snapshot (' + D.source + ', ' + D.built + ').';
   }
 
   // ---------- indicator table ----------

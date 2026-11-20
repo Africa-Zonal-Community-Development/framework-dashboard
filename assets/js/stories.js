@@ -30,7 +30,7 @@
     $('st-linked').textContent = String(Object.keys(keys).length);
     var i01 = IND['01'];
     if (i01 && (i01.z2026 != null)) $('ind01').textContent = 'reported: ' + fmt(i01.z2026, i01.unit);
-    $('built').textContent = D.live ? 'Indicator values load live from the results database.' : 'Indicator values from the bundled data snapshot.';
+    if ($('built')) $('built').textContent = D.live ? 'Indicator values load live from the results database.' : 'Indicator values from the bundled data snapshot.';
     drawDetail(false);
   }
 
@@ -160,5 +160,5 @@
   // ---------- start ----------
   var m = /pathway-(\d)/.exec(location.hash); if (m && +m[1] >= 1 && +m[1] <= 8) sel = +m[1];
   drawCards(); drawDetail(false); drawCloud(); drawThemes();
-  window.AZF_loadData().then(useData, function () { $('built').textContent = 'Indicator values could not be loaded.'; });
+  window.AZF_loadData().then(useData, function () { if ($('built')) $('built').textContent = 'Indicator values could not be loaded.'; });
 })();

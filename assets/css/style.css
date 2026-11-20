@@ -263,3 +263,6 @@ h1 { margin: 0 0 6px; color: var(--navy); font-weight: 800; text-transform: uppe
 @media print { .hero-actions, .act-note { display: none; } }
 
 @media (min-width: 1180px) { .kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.foot-in { align-items: center !important; }
+.foot-in p { margin: 0; }
+@media (max-width: 680px) { .foot .foot-in { flex-direction: row; } }
