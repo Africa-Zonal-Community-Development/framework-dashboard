@@ -2,9 +2,51 @@
    Data: window.AZF_DATA from data/azf-data.js (built by scripts/build_data.py). */
 (function () {
   'use strict';
-  var D = window.AZF_DATA;
   var $ = function (id) { return document.getElementById(id); };
-  if (!D) { $('lede').textContent = 'The data file (data/azf-data.js) could not be loaded.'; return; }
+
+  /* Load live data from Supabase (edited in the admin console); fall back to the
+     bundled snapshot in data/azf-data.js if the database can't be reached. */
+  function loadLive() {
+    var C = window.AZF_CONFIG;
+    if (!C || !window.fetch) return Promise.reject(new Error('no config'));
+    var h = { apikey: C.supabaseKey, Authorization: 'Bearer ' + C.supabaseKey };
+    var get = function (path) {
+      return fetch(C.supabaseUrl + '/rest/v1/' + path, { headers: h }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
+      });
+    };
+    return Promise.all([
+      get('territories?select=tty,territory,countries&order=sort.asc,tty.asc'),
+      get('indicators?select=*&order=sort.asc,key.asc'),
+      get('results?select=key,tty,value,note&limit=20000'),
+      get('indicators?select=updated_at&order=updated_at.desc&limit=1'),
+      get('results?select=updated_at&order=updated_at.desc&limit=1')
+    ]).then(function (a) {
+      var num = function (v) { return v === null || v === undefined || v === '' ? null : +v; };
+      var stamps = [a[3][0], a[4][0]].filter(Boolean).map(function (x) { return x.updated_at; }).sort();
+      return {
+        live: true,
+        source: 'live database',
+        built: stamps.length ? stamps[stamps.length - 1].slice(0, 10) : '',
+        territories: a[0],
+        indicators: a[1].map(function (d) {
+          return { key: d.key, so: d.so, er: d.er || '', er_name: d.er_name || '', indicator: d.indicator, full: d.full_text || d.indicator,
+            unit: d.unit, z2025: num(d.z2025), z2026: num(d.z2026), z2026_note: d.z2026_note, sdg: d.sdg, global_manual: d.global_manual };
+        }),
+        results: a[2].map(function (r) { return { key: r.key, tty: r.tty, value: num(r.value), note: r.note }; })
+      };
+    });
+  }
+  function boot() {
+    var timer = new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 6000); });
+    Promise.race([loadLive(), timer]).then(start, function () {
+      if (window.AZF_DATA) start(window.AZF_DATA);
+      else $('lede').textContent = 'The dashboard data could not be loaded. Please refresh the page.';
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+
+  function start(D) {
 
   var COL = {
     P: { c: '#02538A', l: '#B1CBDA', x: '#D8E9F7', name: 'Goal & Purpose' },
@@ -95,7 +137,7 @@
     TTY.forEach(function (t) { sel.appendChild(el('option', { value: t.tty, text: t.territory })); });
     var story = byKey['02'];
     $('story').textContent = story && story.z2026_note ? story.z2026_note : 'No synthesis submitted.';
-    $('built').textContent = 'Data file: ' + D.source + ', built ' + D.built + '.';
+    $('built').textContent = D.live ? 'Figures load live from the admin database' + (D.built ? ', last edited ' + D.built : '') + '.' : 'Showing the bundled data snapshot (' + D.source + ', ' + D.built + ').';
   }
 
   // ---------- indicator table ----------
@@ -319,4 +361,5 @@
   readHash();
   $('tty-select').value = S.tty;
   redraw();
+  }
 })();

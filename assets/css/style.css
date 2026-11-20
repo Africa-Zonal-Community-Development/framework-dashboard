@@ -211,3 +211,6 @@ h1 { margin: 0 0 6px; color: var(--navy); font-weight: 800; text-transform: uppe
   .story[open] .story-body, .story .story-body { display: block; }
   body { background: #fff; }
 }
+
+.admin-link { color: #fff; font-weight: 700; text-underline-offset: 3px; display: inline-block; padding: 4px 0; min-height: 24px; }
+.admin-link:focus-visible { outline-color: #fff; }

@@ -23,9 +23,41 @@ Selections are kept in the address bar (for example `#so=2&tty=KYW&ind=2.1.1`), 
 - Touch targets are at least 44 px, focus outlines are visible, and the page respects reduced motion and Windows high-contrast mode.
 - The page passes an automated axe-core audit (WCAG 2.1 A/AA and best practice) with no violations.
 
-## Updating the data
+## Admin console (sign in and edit)
 
-The page reads `data/azf-data.js`, which is generated from the Excel export:
+`admin.html` (linked as **Admin sign in** in the page footer) lets approved admins edit everything:
+- indicators: labels, outcome, expected result, type, 2025 and 2026 zone totals, notes, SDGs;
+- the figure and note for every territory;
+- the territory list;
+- the admin list.
+
+It also shows an activity log of every change and has exports (`azf-data.js`, JSON, CSV).
+
+- **Sign-in:** enter an approved email, receive a one-time code by email, and type it in. There are no passwords.
+- **Admins:** `dns.brns15@gmail.com` and `sarahmakanjera@gmail.com`. Admins can add or remove others in the console.
+- **Limits:** each email gets 5 code requests and 5 sign-ins per hour, enforced in the database (`request_signin_code`, `admin_access_token_hook`).
+- **Security:** Row Level Security means anyone can read, but only emails in `public.admins` can write. Every change is recorded in `public.audit_log`.
+- **Backend:** the Supabase project *AZF Framework Dashboard* (`qrupztbikmjnjytxtfso`, organisation ASLP). The connection details are in `assets/js/config.js`. The publishable key there is meant to be public.
+
+The public dashboard reads the live database, so saved edits appear on the next page load. If the database can't be reached, the page falls back to the bundled snapshot in `data/azf-data.js`.
+
+### One-time Supabase setup (dashboard settings)
+
+These settings can't be made from code. They are done once in the Supabase dashboard for the project:
+
+1. **Send codes instead of links.** Go to **Authentication → Emails → Templates → Magic Link**. Set the subject to `Your AZF dashboard sign-in code` and the body to:
+   `<h2>Your sign-in code</h2><p>Enter this code to sign in to the AZF dashboard admin console:</p><p style="font-size:28px;letter-spacing:4px"><strong>{{ .Token }}</strong></p><p>If you didn't request this, ignore this email.</p>`
+2. **Turn on the server-side checks.** Go to **Authentication → Hooks**:
+   - **Customize Access Token** → Postgres → `public.admin_access_token_hook` (admins only, 5 sign-ins per hour).
+   - **Before User Created** → Postgres → `public.admin_only_signup_hook` (blocks accounts for non-admin emails).
+3. **Email delivery.** Supabase's built-in email only sends to members of the Supabase organisation's team, and only a few emails per hour. To email any admin, set up custom SMTP under **Authentication → Emails → SMTP Settings** (for example Resend, Brevo, or a Gmail app password). The alternative is to invite each admin to the Supabase organisation.
+4. **URL configuration.** Under **Authentication → URL Configuration**, set the Site URL to `https://africa-zonal-community-development.github.io/fraework-dashboard/`.
+
+## Updating the bundled snapshot
+
+The page falls back to `data/azf-data.js`. You can refresh it in two ways:
+- From the admin console: **Export → Download azf-data.js**, then commit that file to `data/`.
+- From an Excel export:
 
 ```bash
 pip install openpyxl

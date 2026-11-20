@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#02538A">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin console — AZF Framework Dashboard</title>
+  <link rel="icon" href="assets/img/tsa-shield.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="admin-bar">
+    <div class="wrap admin-bar-in">
+      <p class="brand brand-light"><img src="assets/img/tsa-shield.png" alt="" width="24" height="28"> <span>AZF Framework Dashboard · Admin console</span></p>
+      <div class="who" id="who" hidden>
+        <span id="who-email"></span>
+        <button type="button" class="btn btn-ghost" id="sign-out">Sign out</button>
+      </div>
+      <a class="btn btn-ghost" href="index.html">View dashboard</a>
+    </div>
+  </header>
+
+  <main id="main" class="wrap" tabindex="-1">
+    <p class="sr-only" aria-live="polite" id="live"></p>
+
+    <!-- ===== Sign in ===== -->
+    <section class="signin card" id="signin" aria-labelledby="signin-h">
+      <h1 id="signin-h">Admin sign in</h1>
+      <p class="cap">Only approved admin emails can sign in. We'll email you a one-time code. Up to 5 sign-in attempts per email per hour.</p>
+
+      <form id="email-form" novalidate>
+        <label class="lbl" for="email">Email address</label>
+        <input class="inp" id="email" name="email" type="email" autocomplete="email" inputmode="email" required aria-describedby="email-msg">
+        <button class="btn btn-primary" type="submit" id="send-btn">Email me a code</button>
+        <p class="msg" id="email-msg" role="status"></p>
+      </form>
+
+      <form id="code-form" novalidate hidden>
+        <p class="cap">We sent a code to <strong id="code-email"></strong>. It expires in about an hour. Check your spam folder if it doesn't arrive.</p>
+        <label class="lbl" for="code">One-time code</label>
+        <input class="inp code-inp" id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required aria-describedby="code-msg">
+        <div class="row-btns">
+          <button class="btn btn-primary" type="submit" id="verify-btn">Sign in</button>
+          <button class="btn btn-ghost-dark" type="button" id="back-btn">Use a different email</button>
+        </div>
+        <p class="msg" id="code-msg" role="status"></p>
+      </form>
+    </section>
+
+    <!-- ===== Console ===== -->
+    <section id="console" hidden aria-labelledby="console-h">
+      <h1 id="console-h" class="sr-only">Admin console</h1>
+      <nav class="tabs" role="tablist" aria-label="Admin sections">
+        <button role="tab" id="tab-ind" aria-controls="p-ind" aria-selected="true">Indicators</button>
+        <button role="tab" id="tab-res" aria-controls="p-res" aria-selected="false" tabindex="-1">Territory results</button>
+        <button role="tab" id="tab-tty" aria-controls="p-tty" aria-selected="false" tabindex="-1">Territories</button>
+        <button role="tab" id="tab-adm" aria-controls="p-adm" aria-selected="false" tabindex="-1">Admins</button>
+        <button role="tab" id="tab-log" aria-controls="p-log" aria-selected="false" tabindex="-1">Activity</button>
+        <button role="tab" id="tab-exp" aria-controls="p-exp" aria-selected="false" tabindex="-1">Export</button>
+      </nav>
+
+      <!-- Indicators -->
+      <div class="panel" role="tabpanel" id="p-ind" aria-labelledby="tab-ind">
+        <div class="split">
+          <div class="card list-card">
+            <h2>Indicators</h2>
+            <div class="filters-inline">
+              <label class="lbl" for="ind-search">Search</label>
+              <input class="inp" id="ind-search" type="search" placeholder="Ref or words">
+              <label class="lbl" for="ind-so">Outcome</label>
+              <select class="inp" id="ind-so">
+                <option value="">All outcomes</option><option value="P">Goal &amp; Purpose</option><option value="1">1 · Education</option><option value="2">2 · Health &amp; WASH</option><option value="3">3 · Economic inclusion</option><option value="4">4 · Safe environments</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="ind-new">+ New indicator</button>
+            <ul class="pick-list" id="ind-list" aria-label="Indicators"></ul>
+          </div>
+          <form class="card form-card" id="ind-form" novalidate aria-labelledby="ind-form-h">
+            <h2 id="ind-form-h">Edit indicator</h2>
+            <div class="grid-form">
+              <div class="fld"><label class="lbl" for="f-key">Ref (unique)</label><input class="inp" id="f-key" required></div>
+              <div class="fld"><label class="lbl" for="f-sort">Order</label><input class="inp" id="f-sort" type="number" step="1"></div>
+              <div class="fld"><label class="lbl" for="f-so">Strategic Outcome</label> <select class="inp" id="f-so"><option value="P">Goal &amp; Purpose</option><option value="1">1 · Education</option><option value="2">2 · Health &amp; WASH</option><option value="3">3 · Economic inclusion</option><option value="4">4 · Safe environments</option></select></div>
+              <div class="fld"><label class="lbl" for="f-unit">Type</label> <select class="inp" id="f-unit"><option value="count">Count (#)</option><option value="pct">Percentage (0–100)</option><option value="tty">Number of territories</option><option value="text">Qualitative / text</option></select></div>
+              <div class="fld"><label class="lbl" for="f-er">Expected result no.</label><input class="inp" id="f-er" placeholder="e.g. 1.1 (blank if outcome-level)"></div>
+              <div class="fld"><label class="lbl" for="f-er-name">Expected result name</label><input class="inp" id="f-er-name"></div>
+              <div class="fld wide"><label class="lbl" for="f-ind">Short label (shown in tables)</label><input class="inp" id="f-ind" required></div>
+              <div class="fld wide"><label class="lbl" for="f-full">Full indicator text</label><textarea class="inp" id="f-full" rows="3"></textarea></div>
+              <div class="fld"><label class="lbl" for="f-z25">Zone total 2025</label><input class="inp" id="f-z25" type="number" step="any" inputmode="decimal"></div>
+              <div class="fld"><label class="lbl" for="f-z26">Zone total 2026</label><input class="inp" id="f-z26" type="number" step="any" inputmode="decimal"></div>
+              <div class="fld wide"><label class="lbl" for="f-note">2026 note / qualitative summary</label><textarea class="inp" id="f-note" rows="4"></textarea></div>
+              <div class="fld"><label class="lbl" for="f-sdg">SDG targets</label><input class="inp" id="f-sdg"></div>
+              <div class="fld"><label class="lbl" for="f-gm">Global Manual link</label><input class="inp" id="f-gm"></div>
+            </div>
+            <p class="hint-sm">Percentages are entered as 0–100 (e.g. 85 for 85%). Leave a total blank if not reported.</p>
+            <div class="row-btns">
+              <button class="btn btn-primary" type="submit">Save indicator</button>
+              <button class="btn btn-danger" type="button" id="ind-del">Delete indicator</button>
+            </div>
+            <p class="msg" id="ind-msg" role="status"></p>
+            <p class="meta" id="ind-meta"></p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Territory results -->
+      <div class="panel" role="tabpanel" id="p-res" aria-labelledby="tab-res" hidden>
+        <div class="card">
+          <h2>Territory results</h2>
+          <label class="lbl" for="res-ind">Indicator</label>
+          <select class="inp" id="res-ind"></select>
+          <p class="hint-sm" id="res-hint"></p>
+          <form id="res-form" novalidate>
+            <div class="table-scroll" role="region" aria-label="Territory results (scrollable)" tabindex="0">
+              <table class="edit-table">
+                <caption class="sr-only">Figures per territory for the selected indicator</caption>
+                <thead><tr><th scope="col">Territory</th><th scope="col">Value</th><th scope="col">Note</th></tr></thead>
+                <tbody id="res-body"></tbody>
+              </table>
+            </div>
+            <div class="row-btns sticky-btns">
+              <button class="btn btn-primary" type="submit">Save changes</button>
+              <button class="btn btn-ghost-dark" type="button" id="res-sum">Set zone 2026 total = sum of territories</button>
+            </div>
+            <p class="msg" id="res-msg" role="status"></p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Territories -->
+      <div class="panel" role="tabpanel" id="p-tty" aria-labelledby="tab-tty" hidden>
+        <div class="card">
+          <h2>Territories</h2>
+          <p class="cap">Codes are used across all results. Renaming a code updates its results; deleting a territory deletes its results.</p>
+          <form id="tty-form" novalidate>
+            <div class="table-scroll" role="region" aria-label="Territories (scrollable)" tabindex="0">
+              <table class="edit-table">
+                <caption class="sr-only">Territories</caption>
+                <thead><tr><th scope="col">Code</th><th scope="col">Name</th><th scope="col">Countries covered</th><th scope="col">Order</th><th scope="col"><span class="sr-only">Delete</span></th></tr></thead>
+                <tbody id="tty-body"></tbody>
+              </table>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-primary" type="submit">Save territories</button>
+              <button class="btn btn-ghost-dark" type="button" id="tty-add">+ Add territory</button>
+            </div>
+            <p class="msg" id="tty-msg" role="status"></p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Admins -->
+      <div class="panel" role="tabpanel" id="p-adm" aria-labelledby="tab-adm" hidden>
+        <div class="card narrow">
+          <h2>Admins</h2>
+          <p class="cap">Anyone on this list can sign in with an email code and edit everything. You can't remove yourself, and at least one admin must remain.</p>
+          <ul class="adm-list" id="adm-list"></ul>
+          <form id="adm-form" class="inline-form" novalidate>
+            <label class="lbl" for="adm-email">Add admin email</label>
+            <input class="inp" id="adm-email" type="email" autocomplete="off" required>
+            <button class="btn btn-primary" type="submit">Add admin</button>
+          </form>
+          <p class="msg" id="adm-msg" role="status"></p>
+        </div>
+      </div>
+
+      <!-- Activity -->
+      <div class="panel" role="tabpanel" id="p-log" aria-labelledby="tab-log" hidden>
+        <div class="card">
+          <h2>Activity</h2>
+          <p class="cap">The last 200 changes, newest first.</p>
+          <button type="button" class="btn btn-ghost-dark btn-sm" id="log-refresh">Refresh</button>
+          <div class="table-scroll" role="region" aria-label="Activity log (scrollable)" tabindex="0">
+            <table class="edit-table log">
+              <caption class="sr-only">Change history</caption>
+              <thead><tr><th scope="col">When</th><th scope="col">Who</th><th scope="col">What</th><th scope="col">Item</th><th scope="col">Change</th></tr></thead>
+              <tbody id="log-body"></tbody>
+            </table>
+          </div>
+          <h3>Recent sign-ins</h3>
+          <ul class="adm-list" id="signin-list"></ul>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="panel" role="tabpanel" id="p-exp" aria-labelledby="tab-exp" hidden>
+        <div class="card narrow">
+          <h2>Export</h2>
+          <p class="cap">Download the current data as a backup or to update the bundled snapshot in the GitHub repository (<code>data/azf-data.js</code>).</p>
+          <div class="row-btns">
+            <button class="btn btn-primary" type="button" id="exp-js">Download azf-data.js</button>
+            <button class="btn btn-ghost-dark" type="button" id="exp-json">Download JSON</button>
+            <button class="btn btn-ghost-dark" type="button" id="exp-csv">Download results CSV</button>
+          </div>
+          <p class="msg" id="exp-msg" role="status"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/vendor/supabase-2.119.2.min.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>
