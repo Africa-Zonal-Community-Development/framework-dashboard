@@ -12,6 +12,14 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
+  <nav class="site-nav" aria-label="Site sections">
+    <div class="wrap site-nav-in">
+      <a class="site-brand" href="index.html"><img src="assets/img/tsa-shield.png" alt="" width="18" height="21"> AZF 2026</a>
+      <a href="index.html" aria-current="page">Results dashboard</a>
+      <a href="stories.html">Stories of change</a>
+      <a href="admin.html" class="nav-admin">Admin</a>
+    </div>
+  </nav>
 
   <header class="hero" id="overview">
     <div class="wrap hero-grid">
@@ -123,10 +131,15 @@
       </section>
     </div>
 
-    <details class="card story" id="stories">
-      <summary>Stories of change — synthesis of the 24 stories submitted (indicator 02)</summary>
-      <div class="story-body" id="story"></div>
-    </details>
+    <section class="card story-teaser" id="stories" aria-labelledby="st-h">
+      <div class="st-text">
+        <p class="st-kicker">Indicator 02 · Stories of change</p>
+        <h2 id="st-h">Reducing vulnerabilities leads to long-term transformation</h2>
+        <p>Twenty-four stories from across the Zone point to eight recurring pathways from support to lasting change, from savings groups and schooling to protection and climate-smart farming.</p>
+        <a class="btn-link" href="stories.html">Explore the stories of change →</a>
+      </div>
+      <a class="st-img" href="stories.html" tabindex="-1" aria-hidden="true"><img src="assets/img/stories-pathways.jpg" alt="" loading="lazy" width="1385" height="923"></a>
+    </section>
   </main>
 
   <footer class="foot">
@@ -138,6 +151,7 @@
 
   <script src="assets/js/config.js"></script>
   <script src="data/azf-data.js"></script>
+  <script src="assets/js/data-loader.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

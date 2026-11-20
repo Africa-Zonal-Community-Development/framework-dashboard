@@ -23,6 +23,18 @@ Selections are kept in the address bar (for example `#so=2&tty=KYW&ind=2.1.1`), 
 - Touch targets are at least 44 px, focus outlines are visible, and the page respects reduced motion and Windows high-contrast mode.
 - The page passes an automated axe-core audit (WCAG 2.1 A/AA and best practice) with no violations.
 
+## Stories of change page
+
+`stories.html` (the **Stories of change** tab) presents the *Consolidated Assessment of 24 Stories, 2026* (indicator 02):
+
+- **Hypothesis and verdict:** "reducing vulnerabilities leads to long-term transformation", with very strong qualitative support.
+- **Eight pathways explorer:** select a pathway to see its inputs, its three-step chain of change, and the stories cited. It also shows the **framework indicators that measure that pathway, with live 2026 and 2025 zone figures**, each linking back to the dashboard. Disability inclusion is flagged as having no dedicated indicator yet.
+- **Outcomes word cloud:** select an outcome (for example *Savings*) to highlight the pathways that produce it.
+- **Six evidence themes,** each tagged with its Strategic Outcome.
+- **From recipients to role models,** the original graphics from the Word document (click to enlarge), and a note on the evidence (AI-generated synthesis, qualitative, follow-up needed).
+
+The narrative is kept in `assets/js/stories.js` (`PW`, `THEMES`, `WORDS`). The figures come from the same database as the dashboard.
+
 ## Admin console (sign in and edit)
 
 `admin.html` (linked as **Admin sign in** in the page footer) lets approved admins edit everything:
