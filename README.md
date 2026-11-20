@@ -76,7 +76,7 @@ These settings can't be made from code. They are done once in the Supabase dashb
    - **Customize Access Token** → Postgres → `public.admin_access_token_hook` (admins only, 5 sign-ins per hour).
    - **Before User Created** → Postgres → `public.admin_only_signup_hook` (blocks accounts for non-admin emails).
 3. **Email delivery.** Supabase's built-in email only sends to members of the Supabase organisation's team, and only a few emails per hour. To email any admin, set up custom SMTP under **Authentication → Emails → SMTP Settings** (for example Resend, Brevo, or a Gmail app password). The alternative is to invite each admin to the Supabase organisation.
-4. **URL configuration.** Under **Authentication → URL Configuration**, set the Site URL to `https://africa-zonal-community-development.github.io/fraework-dashboard/`.
+4. **URL configuration.** Under **Authentication → URL Configuration**, set the Site URL to `https://africa-zonal-community-development.github.io/framework-dashboard/`.
 
 ## Updating the bundled snapshot
 
@@ -99,7 +99,7 @@ It writes both `data/azf-data.js`, used by the page, and `data/azf-data.json`, f
 ## Publishing on GitHub Pages
 
 Go to **Settings → Pages**, choose **Deploy from a branch**, then **`main`** and **`/ (root)`**. The site then appears at
-`https://africa-zonal-community-development.github.io/fraework-dashboard/`.
+`https://africa-zonal-community-development.github.io/framework-dashboard/`.
 
 The site is plain HTML, CSS and JavaScript with no build step and no external libraries. It also works when `index.html` is opened directly from a downloaded copy.
 

@@ -16,7 +16,7 @@
   }
   document.querySelectorAll('[data-share]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var url = location.protocol.indexOf('http') === 0 ? location.href : 'https://africa-zonal-community-development.github.io/fraework-dashboard/' + location.pathname.split('/').pop() + location.hash;
+      var url = location.protocol.indexOf('http') === 0 ? location.href : 'https://africa-zonal-community-development.github.io/framework-dashboard/' + location.pathname.split('/').pop() + location.hash;
       var data = { title: document.title, text: 'Africa Zonal Community Development Framework — 2026 results', url: url };
       if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
         navigator.share(data).catch(function () { /* user closed the share sheet */ });
